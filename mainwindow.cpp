@@ -4,49 +4,72 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#define READY	"Ready."
+#define RUNNING	"Running..."
+#define START	"Start"
+#define STOP	"Stop"
+
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
 	, m_ui(new Ui::MainWindow)
-	, m_server(new StreamServer)
-	, m_video(new QVideoWidget)
-	, m_frame(new QPixmap)
+	, m_thread(new StreamThread(this))
 {
 	m_ui->setupUi(this);
-	//frame->loadFromData();
-	//scene->addPixmap(pixmap);
-	//scene->setSceneRect(pixmap.rect());
-	//ui->graphicsView->setScene(scene);
-	QMainWindow::statusBar()->showMessage("Ready");
+	QMainWindow::statusBar()->showMessage(READY);
+
+	QString stream =
+		"https://videos3.earthcam.com/fecnetwork"
+		"/AbbeyRoadHD1.flv/chunklist_w1632720834.m3u8";
+
+	m_ui->lineEditAddress->setText(stream);
+	m_ui->lineEditAddress->setText("./stream.mp4");
 
 	// TODO: remove it
-	m_ui->pushButtonStream->click();
+	//m_ui->pushButtonStream->click();
+
+	connect(m_thread,	&StreamThread::error,
+		this,		&MainWindow::onThreadError);
 }
 
 MainWindow::~MainWindow()
 {
-	delete m_frame;
-	delete m_video;
-	delete m_server;
+	delete m_thread;
 	delete m_ui;
+}
+
+void MainWindow::onThreadError(QTcpSocket::SocketError error)
+{
+	m_ui->pushButtonStream->setText(START);
+	QMainWindow::statusBar()->showMessage(READY);
+
+	if (m_thread->isRunning()) {
+		m_thread->exit();
+	}
+
+	QMessageBox::critical(
+		this,
+		"Failed to start listening",
+		QVariant::fromValue(error).toString());
+}
+
+void MainWindow::onServerError(QTcpSocket::SocketError error)
+{
+	QMessageBox::critical(
+		this,
+		"Something went wrong with the socket",
+		QVariant::fromValue(error).toString());
 }
 
 void MainWindow::on_pushButtonStream_released()
 {
-	if (m_server->isListening()) {
-		m_ui->pushButtonStream->setText("Start listening");
-		QMainWindow::statusBar()->showMessage("Ready");
-		m_server->close();
-		return;
+	if (!m_thread->isRunning()) {
+		m_ui->pushButtonStream->setText(STOP);
+		QMainWindow::statusBar()->showMessage(RUNNING);
+		m_thread->setUrl(m_ui->lineEditAddress->text());
+		m_thread->start();
+	} else {
+		m_ui->pushButtonStream->setText(START);
+		QMainWindow::statusBar()->showMessage(READY);
+		m_thread->exit();
 	}
-
-	if (!m_server->listen(QHostAddress::LocalHost, 2563)) {
-		QMessageBox::critical(
-			this,
-			"Permission denied",
-			"Failed to start listening");
-		return;
-	}
-
-	m_ui->pushButtonStream->setText("Stop listening");
-	QMainWindow::statusBar()->showMessage("Listening on port 2563...");
 }

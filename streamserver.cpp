@@ -1,21 +1,27 @@
-#include "streamthread.h"
+#include <QTcpSocket>
 #include "streamserver.h"
+#include "streamworker.h"
 
 StreamServer::StreamServer(QObject *parent)
 	: QTcpServer(parent)
+	, m_id(0)
 {
-}
-
-void StreamServer::serve()
-{
-	if (!this->listen(QHostAddress::LocalHost, 2563)) {
-		qDebug() << "nie działa";
-	}
+	// 1 min of cache
+	//m_frames.setCapacity(FPS * 60);
+	m_pool.setMaxThreadCount(FPS);
 }
 
 void StreamServer::incomingConnection(qintptr descriptor)
 {
-	auto *thread  = new StreamThread(this, descriptor);
-	connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-	thread->start();
+	qDebug() << "Incomming connection" << descriptor;
+
+	auto worker = new StreamWorker();
+	worker->setAutoDelete(true);
+
+	m_id++;
+	worker->m_id = m_id;
+	worker->m_descriptor = descriptor;
+	worker->m_data = &m_frames[m_id % FPS];
+
+	m_pool.start(worker);
 }

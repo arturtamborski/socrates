@@ -1,45 +1,39 @@
-#include <QFile>
+#include "mainwindow.h"
 #include "streamthread.h"
 
-StreamThread::StreamThread(QObject *parent, qintptr descriptor)
+StreamThread::StreamThread(QObject *parent)
 	: QThread(parent)
-	, m_socket(new QTcpSocket)
-	, m_descriptor(descriptor)
 {
+	connect(&m_server, 	SIGNAL(error(QTcpSocket::SocketError)),
+		parent,		SLOT(onServerError(QTcpSocket::SocketError)));
+	connect(this,		&QThread::started,
+		this,		&StreamThread::onStart);
+	connect(this,		&QThread::finished,
+		this,		&StreamThread::onFinish);
 }
 
-StreamThread::~StreamThread()
+void StreamThread::setUrl(QString &&url)
 {
-	delete m_socket;
+	m_url = url;
 }
 
-void StreamThread::run()
+void StreamThread::onStart()
 {
-	if (!m_socket->setSocketDescriptor(m_descriptor)) {
-		emit error(m_socket->error());
-		return;
+	if (!m_server.listen(QHostAddress::LocalHost, 2563)) {
+		qDebug() << "Error listening!";
+		emit error(m_server.serverError());
+		exit();
 	}
+	qDebug() << "Listening...";
 
-	auto d = Qt::DirectConnection;
-	connect(m_socket, SIGNAL(connected()), this, SLOT(connected()), d);
-	connect(m_socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
-
-	exec(); // loop
+	if (!m_transcoder.start(m_url, FPS)) {
+		emit error(m_server.serverError());
+	}
+	qDebug() << "Transcoding...";
 }
 
-void StreamThread::connected()
+void StreamThread::onFinish()
 {
-	auto data = m_socket->readAll();
-
-	QFile file("./file.jpg");
-	file.open(QFile::WriteOnly);
-	file.write(data);
-	file.flush();
-	file.close();
-}
-
-void StreamThread::disconnected()
-{
-	m_socket->deleteLater();
-	exit(0);
+	m_server.close();
+	qDebug() << "Closed!";
 }

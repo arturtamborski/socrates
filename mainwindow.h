@@ -3,8 +3,7 @@
 
 #include <QMainWindow>
 #include <QVideoWidget>
-#include <QPixmap>
-#include "streamserver.h"
+#include "streamthread.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -18,14 +17,14 @@ public:
 	MainWindow(QWidget *parent = nullptr);
 	~MainWindow();
 
-private slots:
+public slots:
+	void onThreadError(QTcpSocket::SocketError error);
+	void onServerError(QTcpSocket::SocketError error);
 	void on_pushButtonStream_released();
 
 private:
 	Ui::MainWindow *m_ui;
-	StreamServer *m_server;
-	QVideoWidget *m_video;
-	QPixmap *m_frame;
+	StreamThread *m_thread;
 };
 
 #endif // MAINWINDOW_H

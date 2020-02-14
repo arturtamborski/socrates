@@ -3,27 +3,29 @@
 
 #include <QThread>
 #include <QTcpSocket>
+#include <QContiguousCache>
+#include "streamserver.h"
+#include "streamtranscoder.h"
 
 class StreamThread : public QThread
 {
 	Q_OBJECT
 
 public:
-	explicit StreamThread(QObject *parent, qintptr descriptor);
-	~StreamThread();
-
-	void run() override;
+	explicit StreamThread(QObject *parent = nullptr);
+	void setUrl(QString &&url);
 
 signals:
 	void error(QTcpSocket::SocketError error);
 
-public slots:
-	void connected();
-	void disconnected();
+private slots:
+	void onStart();
+	void onFinish();
 
 private:
-	QTcpSocket *m_socket;
-	qintptr m_descriptor;
+	StreamTranscoder m_transcoder;
+	StreamServer m_server;
+	QString m_url;
 };
 
 #endif // STREAMTHREAD_H

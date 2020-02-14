@@ -2,6 +2,9 @@
 #define STREAMSERVER_H
 
 #include <QTcpServer>
+#include <QTcpSocket>
+#include <QList>
+#include <QThreadPool>
 
 class StreamServer : public QTcpServer
 {
@@ -10,14 +13,19 @@ class StreamServer : public QTcpServer
 public:
 	explicit StreamServer(QObject *parent = nullptr);
 
-	void serve();
-
 signals:
-
-public slots:
+	void error(QTcpSocket::SocketError error);
 
 protected:
 	void incomingConnection(qintptr descriptor) override;
+
+private:
+	int id();
+
+private:
+	unsigned long long int m_id;
+	QByteArray m_frames[24];
+	QThreadPool m_pool;
 };
 
 #endif // STREAMSERVER_H
