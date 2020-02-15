@@ -17,12 +17,12 @@ StreamTranscoder::~StreamTranscoder()
 	m_process.kill();
 }
 
-bool StreamTranscoder::start(QString &url, int fps)
+bool StreamTranscoder::start(QString &url, int fps, int speed)
 {
 	m_args.clear();
 
 	// source
-	m_args << "-i" << QString("'%1'").arg(url);
+	m_args << "-i" << url;
 
 	// logging
 	m_args << "-loglevel" << "info";
@@ -32,6 +32,9 @@ bool StreamTranscoder::start(QString &url, int fps)
 
 	// frame limit
 	m_args << "-vf" << QString("fps=%1").arg(fps);
+
+	// slow down
+	m_args << "-filter:v" << QString("setpts=%1*PTS").arg(speed);
 
 	// overwrite output
 	m_args << "-y";
@@ -57,7 +60,7 @@ bool StreamTranscoder::start(QString &url, int fps)
 	// output destination
 	m_args << "tcp://127.0.0.1:2563";
 
-	m_process.start("/home/artur/code/self/temp/a.out", m_args);
+	m_process.start("ffmpeg", m_args);
 	if (!m_process.waitForStarted()) {
 		qDebug() << "Timeout! failed to start";
 		return false;
@@ -68,6 +71,7 @@ bool StreamTranscoder::start(QString &url, int fps)
 
 void StreamTranscoder::finish()
 {
+	qDebug() << "stopping transcoder!";
 	m_process.kill();
 }
 

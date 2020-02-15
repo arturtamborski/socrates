@@ -12,7 +12,7 @@ public:
 	StreamTranscoder(QObject *parent = nullptr);
 	~StreamTranscoder();
 
-	bool start(QString &url, int fps);
+	bool start(QString &url, int fps, int speed = 1);
 	void finish();
 	bool isRunning();
 

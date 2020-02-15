@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent)
 		"https://videos3.earthcam.com/fecnetwork"
 		"/AbbeyRoadHD1.flv/chunklist_w1632720834.m3u8";
 
-	m_ui->lineEditAddress->setText(stream);
+	//m_ui->lineEditAddress->setText(stream);
 	m_ui->lineEditAddress->setText("./stream.mp4");
 
 	// TODO: remove it

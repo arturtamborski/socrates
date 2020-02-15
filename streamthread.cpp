@@ -4,12 +4,14 @@
 StreamThread::StreamThread(QObject *parent)
 	: QThread(parent)
 {
-	connect(&m_server, 	SIGNAL(error(QTcpSocket::SocketError)),
-		parent,		SLOT(onServerError(QTcpSocket::SocketError)));
 	connect(this,		&QThread::started,
 		this,		&StreamThread::onStart);
 	connect(this,		&QThread::finished,
 		this,		&StreamThread::onFinish);
+	connect(this,		&QThread::finished,
+		&m_transcoder,	&StreamTranscoder::finish);
+	connect(&m_server,	SIGNAL(error(QTcpSocket::SocketError)),
+		parent,		SLOT(onServerError(QTcpSocket::SocketError)));
 }
 
 void StreamThread::setUrl(QString &&url)
@@ -26,8 +28,9 @@ void StreamThread::onStart()
 	}
 	qDebug() << "Listening...";
 
-	if (!m_transcoder.start(m_url, FPS)) {
-		emit error(m_server.serverError());
+	if (!m_transcoder.start(m_url, FPS, 1)) {
+		qDebug() << "Error transcoding!";
+		exit();
 	}
 	qDebug() << "Transcoding...";
 }

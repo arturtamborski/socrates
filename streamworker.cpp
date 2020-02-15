@@ -11,6 +11,12 @@ void StreamWorker::run()
 
 	if (!socket.setSocketDescriptor(m_descriptor)) {
 		qDebug() << "Socket error" << m_descriptor;
+		qDebug() << socket.errorString();
+		return;
+	}
+
+	if (!socket.waitForReadyRead()) {
+		qDebug() << "Socket timeout" << m_descriptor;
 		return;
 	}
 
