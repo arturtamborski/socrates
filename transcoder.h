@@ -4,13 +4,13 @@
 #include <QObject>
 #include <QProcess>
 
-class StreamTranscoder : public QObject
+class Transcoder : public QObject
 {
 	Q_OBJECT
 
 public:
-	StreamTranscoder(QObject *parent = nullptr);
-	~StreamTranscoder();
+	Transcoder(QObject *parent = nullptr);
+	~Transcoder();
 
 	bool start(QString &url, int fps, int speed = 1);
 	void finish();

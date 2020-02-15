@@ -1,11 +1,11 @@
-#include "streamworker.h"
+#include "worker.h"
 
-StreamWorker::StreamWorker()
+Worker::Worker()
 	: m_data(nullptr)
 {
 }
 
-void StreamWorker::run()
+void Worker::run()
 {
 	QTcpSocket socket;
 

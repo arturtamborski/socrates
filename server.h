@@ -6,12 +6,12 @@
 #include <QList>
 #include <QThreadPool>
 
-class StreamServer : public QTcpServer
+class Server : public QTcpServer
 {
 	Q_OBJECT
 
 public:
-	explicit StreamServer(QObject *parent = nullptr);
+	explicit Server(QObject *parent = nullptr);
 
 signals:
 	void error(QTcpSocket::SocketError error);

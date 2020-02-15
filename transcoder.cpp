@@ -1,23 +1,23 @@
 #include <QDebug>
-#include "streamtranscoder.h"
+#include "transcoder.h"
 
-StreamTranscoder::StreamTranscoder(QObject *parent)
+Transcoder::Transcoder(QObject *parent)
 	: QObject(parent)
 {
 	connect(&m_process,	&QProcess::readyRead,
-		this,		&StreamTranscoder::onReadyRead);
+		this,		&Transcoder::onReadyRead);
 	connect(&m_process,	&QProcess::started,
-		this,		&StreamTranscoder::onStart);
+		this,		&Transcoder::onStart);
 	connect(&m_process,	SIGNAL(finished(int)),
 		this,		SLOT(onFinish(int)));
 }
 
-StreamTranscoder::~StreamTranscoder()
+Transcoder::~Transcoder()
 {
 	m_process.kill();
 }
 
-bool StreamTranscoder::start(QString &url, int fps, int speed)
+bool Transcoder::start(QString &url, int fps, int speed)
 {
 	m_args.clear();
 
@@ -69,31 +69,31 @@ bool StreamTranscoder::start(QString &url, int fps, int speed)
 	return true;
 }
 
-void StreamTranscoder::finish()
+void Transcoder::finish()
 {
 	qDebug() << "stopping transcoder!";
 	m_process.kill();
 }
 
-bool StreamTranscoder::isRunning()
+bool Transcoder::isRunning()
 {
 	return m_process.state() == m_process.Running;
 }
 
-void StreamTranscoder::onStart()
+void Transcoder::onStart()
 {
 	qDebug() << "StreamTranscoder: started!";
 	qDebug() << "Arguments passed:" << m_args;
 
 }
 
-void StreamTranscoder::onReadyRead()
+void Transcoder::onReadyRead()
 {
 	qDebug() << "OUT:" << m_process.readAllStandardOutput();
 	qDebug() << "ERR:" << m_process.readAllStandardError();
 }
 
-void StreamTranscoder::onFinish(int code)
+void Transcoder::onFinish(int code)
 {
 	qDebug() << "StreamTranscoder: finished!" << code;
 	qDebug() << "Exit code:" << m_process.exitStatus();

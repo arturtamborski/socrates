@@ -17,17 +17,17 @@ DEFINES += \
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
-    streamserver.cpp \
-    streamthread.cpp \
-    streamtranscoder.cpp \
-    streamworker.cpp
+    server.cpp \
+    thread.cpp \
+    transcoder.cpp \
+    worker.cpp
 
 HEADERS += \
     mainwindow.h \
-    streamserver.h \
-    streamthread.h \
-    streamtranscoder.h \
-    streamworker.h
+    server.h \
+    thread.h \
+    transcoder.h \
+    worker.h
 
 FORMS += \
     mainwindow.ui

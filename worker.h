@@ -4,10 +4,10 @@
 #include <QRunnable>
 #include <QTcpSocket>
 
-class StreamWorker : public QRunnable
+class Worker : public QRunnable
 {
 public:
-	StreamWorker();
+	Worker();
 
 protected:
 	void run() override;

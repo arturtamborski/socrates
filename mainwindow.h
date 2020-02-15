@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QVideoWidget>
-#include "streamthread.h"
+#include "thread.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -24,7 +24,7 @@ public slots:
 
 private:
 	Ui::MainWindow *m_ui;
-	StreamThread *m_thread;
+	Thread *m_thread;
 };
 
 #endif // MAINWINDOW_H

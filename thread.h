@@ -4,15 +4,15 @@
 #include <QThread>
 #include <QTcpSocket>
 #include <QContiguousCache>
-#include "streamserver.h"
-#include "streamtranscoder.h"
+#include "server.h"
+#include "transcoder.h"
 
-class StreamThread : public QThread
+class Thread : public QThread
 {
 	Q_OBJECT
 
 public:
-	explicit StreamThread(QObject *parent = nullptr);
+	explicit Thread(QObject *parent = nullptr);
 	void setUrl(QString &&url);
 
 signals:
@@ -23,8 +23,8 @@ private slots:
 	void onFinish();
 
 private:
-	StreamTranscoder m_transcoder;
-	StreamServer m_server;
+	Transcoder m_transcoder;
+	Server m_server;
 	QString m_url;
 };
 

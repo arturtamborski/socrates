@@ -1,8 +1,8 @@
 #include <QTcpSocket>
-#include "streamserver.h"
-#include "streamworker.h"
+#include "server.h"
+#include "worker.h"
 
-StreamServer::StreamServer(QObject *parent)
+Server::Server(QObject *parent)
 	: QTcpServer(parent)
 	, m_id(0)
 {
@@ -11,11 +11,11 @@ StreamServer::StreamServer(QObject *parent)
 	m_pool.setMaxThreadCount(FPS);
 }
 
-void StreamServer::incomingConnection(qintptr descriptor)
+void Server::incomingConnection(qintptr descriptor)
 {
 	qDebug() << "Incomming connection" << descriptor;
 
-	auto worker = new StreamWorker();
+	auto worker = new Worker();
 	worker->setAutoDelete(true);
 
 	m_id++;

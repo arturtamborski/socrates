@@ -12,7 +12,7 @@
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
 	, m_ui(new Ui::MainWindow)
-	, m_thread(new StreamThread(this))
+	, m_thread(new Thread(this))
 {
 	m_ui->setupUi(this);
 	QMainWindow::statusBar()->showMessage(READY);
@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
 	// TODO: remove it
 	//m_ui->pushButtonStream->click();
 
-	connect(m_thread,	&StreamThread::error,
+	connect(m_thread,	&Thread::error,
 		this,		&MainWindow::onThreadError);
 }
 

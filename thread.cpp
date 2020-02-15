@@ -1,25 +1,25 @@
 #include "mainwindow.h"
-#include "streamthread.h"
+#include "thread.h"
 
-StreamThread::StreamThread(QObject *parent)
+Thread::Thread(QObject *parent)
 	: QThread(parent)
 {
 	connect(this,		&QThread::started,
-		this,		&StreamThread::onStart);
+		this,		&Thread::onStart);
 	connect(this,		&QThread::finished,
-		this,		&StreamThread::onFinish);
+		this,		&Thread::onFinish);
 	connect(this,		&QThread::finished,
-		&m_transcoder,	&StreamTranscoder::finish);
+		&m_transcoder,	&Transcoder::finish);
 	connect(&m_server,	SIGNAL(error(QTcpSocket::SocketError)),
 		parent,		SLOT(onServerError(QTcpSocket::SocketError)));
 }
 
-void StreamThread::setUrl(QString &&url)
+void Thread::setUrl(QString &&url)
 {
 	m_url = url;
 }
 
-void StreamThread::onStart()
+void Thread::onStart()
 {
 	if (!m_server.listen(QHostAddress::LocalHost, 2563)) {
 		qDebug() << "Error listening!";
@@ -35,7 +35,7 @@ void StreamThread::onStart()
 	qDebug() << "Transcoding...";
 }
 
-void StreamThread::onFinish()
+void Thread::onFinish()
 {
 	m_server.close();
 	qDebug() << "Closed!";
