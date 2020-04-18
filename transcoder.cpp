@@ -4,8 +4,6 @@
 Transcoder::Transcoder(QObject *parent)
 	: QObject(parent)
 {
-	connect(&m_process,	&QProcess::readyRead,
-		this,		&Transcoder::onReadyRead);
 	connect(&m_process,	&QProcess::started,
 		this,		&Transcoder::onStart);
 	connect(&m_process,	SIGNAL(finished(int)),
@@ -55,7 +53,7 @@ bool Transcoder::start(QString &url, int fps, int speed)
 	m_args << "-update" << "1";
 
 	// limit frames
-	m_args << "-vframes" << "10";
+	//m_args << "-vframes" << "10";
 
 	// output destination
 	m_args << "tcp://127.0.0.1:2563";
@@ -85,12 +83,6 @@ void Transcoder::onStart()
 	qDebug() << "StreamTranscoder: started!";
 	qDebug() << "Arguments passed:" << m_args;
 
-}
-
-void Transcoder::onReadyRead()
-{
-	qDebug() << "OUT:" << m_process.readAllStandardOutput();
-	qDebug() << "ERR:" << m_process.readAllStandardError();
 }
 
 void Transcoder::onFinish(int code)

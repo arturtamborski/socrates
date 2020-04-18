@@ -35,16 +35,6 @@
    <bool>true</bool>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QWidget" name="widget" native="true">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>40</y>
-      <width>961</width>
-      <height>541</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QLineEdit" name="lineEditAddress">
     <property name="geometry">
      <rect>
@@ -84,6 +74,16 @@
     </property>
     <property name="flat">
      <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QGraphicsView" name="graphicsView">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>40</y>
+      <width>961</width>
+      <height>541</height>
+     </rect>
     </property>
    </widget>
   </widget>

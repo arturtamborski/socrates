@@ -1,10 +1,12 @@
 #ifndef STREAMSERVER_H
 #define STREAMSERVER_H
 
+#include "worker.h"
+
 #include <QTcpServer>
 #include <QTcpSocket>
-#include <QList>
 #include <QThreadPool>
+#include <QPixmap>
 
 class Server : public QTcpServer
 {
@@ -15,16 +17,17 @@ public:
 
 signals:
 	void error(QTcpSocket::SocketError error);
+	void update(QPixmap *frame);
 
 protected:
 	void incomingConnection(qintptr descriptor) override;
 
 private:
-	int id();
+	QTcpSocket m_socket;
 
-private:
-	unsigned long long int m_id;
-	QByteArray m_frames[24];
+	quint64 m_id;
+	QPixmap m_frames[FPS];
+	Worker m_workers[FPS];
 	QThreadPool m_pool;
 };
 

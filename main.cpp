@@ -5,6 +5,10 @@
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
+	a.setOrganizationName("arturtamborski");
+	a.setOrganizationDomain("pl");
+	a.setApplicationName("Socrates");
+
 	MainWindow w;
 	w.show();
 

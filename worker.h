@@ -1,21 +1,27 @@
 #ifndef STREAMWORKER_H
 #define STREAMWORKER_H
 
+#include <QObject>
 #include <QRunnable>
-#include <QTcpSocket>
+#include <QPixmap>
+#include <QDebug>
 
-class Worker : public QRunnable
+class Worker : public QObject, public QRunnable
 {
+	Q_OBJECT
+
 public:
 	Worker();
+
+signals:
+	void finished(quint64 id, QPixmap *frame);
 
 protected:
 	void run() override;
 
 public:
-	qintptr m_descriptor;
-	QByteArray *m_data;
-	int m_id;
+	QPixmap *m_data;
+	quint64 m_id;
 };
 
 #endif // STREAMWORKER_H

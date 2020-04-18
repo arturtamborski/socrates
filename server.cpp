@@ -1,27 +1,41 @@
-#include <QTcpSocket>
 #include "server.h"
-#include "worker.h"
 
 Server::Server(QObject *parent)
 	: QTcpServer(parent)
 	, m_id(0)
 {
-	// 1 min of cache
-	//m_frames.setCapacity(FPS * 60);
 	m_pool.setMaxThreadCount(FPS);
+
+	for (auto &worker : m_workers) {
+		worker.setAutoDelete(false);
+		connect(&worker, SIGNAL(finished(quint64, QPixmap *)),
+			parent, SLOT(onUpdate(quint64, QPixmap *)), Qt::DirectConnection);
+	}
 }
 
 void Server::incomingConnection(qintptr descriptor)
 {
-	qDebug() << "Incomming connection" << descriptor;
+	if (!m_socket.setSocketDescriptor(descriptor)) {
+		qDebug() << "Socket error" << descriptor;
+		qDebug() << m_socket.errorString();
+		return;
+	}
 
-	auto worker = new Worker();
-	worker->setAutoDelete(true);
+	if (!m_socket.waitForReadyRead()) {
+		qDebug() << "Socket timeout" << descriptor;
+		return;
+	}
+
+	//nanosleep((const struct timespec[]){{0, 10 * 1000000L}}, NULL);
+
+	auto frame = new QPixmap;
+	auto data = m_socket.readAll();
+	frame->loadFromData((uchar *)data.data(), data.size());
+	m_socket.close();
 
 	m_id++;
+	auto worker = &m_workers[m_id % FPS];
 	worker->m_id = m_id;
-	worker->m_descriptor = descriptor;
-	worker->m_data = &m_frames[m_id % FPS];
-
+	worker->m_data = frame;
 	m_pool.start(worker);
 }

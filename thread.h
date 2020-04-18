@@ -13,6 +13,7 @@ class Thread : public QThread
 
 public:
 	explicit Thread(QObject *parent = nullptr);
+	~Thread();
 	void setUrl(QString &&url);
 
 signals:
@@ -23,8 +24,8 @@ private slots:
 	void onFinish();
 
 private:
+	Server *m_server;
 	Transcoder m_transcoder;
-	Server m_server;
 	QString m_url;
 };
 

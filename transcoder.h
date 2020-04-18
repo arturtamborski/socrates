@@ -18,7 +18,6 @@ public:
 
 public slots:
 	void onStart();
-	void onReadyRead();
 	void onFinish(int code);
 
 private:
