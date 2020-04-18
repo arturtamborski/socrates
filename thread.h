@@ -9,24 +9,24 @@
 
 class Thread : public QThread
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit Thread(QObject *parent = nullptr);
-	~Thread();
-	void setUrl(QString &&url);
+    explicit Thread(QObject *parent = nullptr);
+    ~Thread();
+    void setUrl(QString &&url);
 
 signals:
-	void error(QTcpSocket::SocketError error);
+    void error(QTcpSocket::SocketError error);
 
 private slots:
-	void onStart();
-	void onFinish();
+    void onStart();
+    void onFinish();
 
 private:
-	Server *m_server;
-	Transcoder m_transcoder;
-	QString m_url;
+    Server *m_server;
+    Transcoder m_transcoder;
+    QString m_url;
 };
 
 #endif // STREAMTHREAD_H

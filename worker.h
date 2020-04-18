@@ -8,20 +8,20 @@
 
 class Worker : public QObject, public QRunnable
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	Worker();
+    Worker() = default;
 
 signals:
-	void finished(quint64 id, QPixmap *frame);
+    void finished(quint64 id, QPixmap *frame);
 
 protected:
-	void run() override;
+    void run() override;
 
 public:
-	QPixmap *m_data;
-	quint64 m_id;
+    QPixmap *m_data;
+    quint64 m_id;
 };
 
 #endif // STREAMWORKER_H
