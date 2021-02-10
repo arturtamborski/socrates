@@ -1,49 +1,29 @@
-#include "mainwindow.h"
 #include "thread.h"
+#include "server.h"
+#include "transcoder.h"
+#include "mainwindow.h"
 
 Thread::Thread(QObject *parent)
     : QThread(parent)
-    , m_server(new Server(parent))
 {
-    connect(this, &QThread::started,  this,          &Thread::onStart);
-    connect(this, &QThread::finished, this,          &Thread::onFinish);
-    connect(this, &QThread::finished, &m_transcoder, &Transcoder::finish);
-    connect(m_server,
-            SIGNAL(error(QTcpSocket::SocketError)),
-            parent,
-            SLOT(onServerError(QTcpSocket::SocketError)));
 }
 
-Thread::~Thread()
-{
-    delete m_server;
-}
-
-void Thread::setUrl(QString &&url)
+void Thread::setUrl(QString &url)
 {
     m_url = url;
 }
 
-void Thread::onStart()
+void Thread::run()
 {
-    qDebug() << "Listening...";
+    Server server;
+    Transcoder transcoder;
 
-    if (!m_server->listen(QHostAddress::LocalHost, 2563)) {
-        qDebug() << "Error listening!";
-        emit error(m_server->serverError());
-        exit();
-    }
+    connect(&transcoder, &Transcoder::error, this, &Thread::error);
+    connect(&server,         &Server::error, this, &Thread::error);
+    connect(&server,         &Server::frame, this, &Thread::frame);
 
-    qDebug() << "Transcoding...";
+    server.start();
+    transcoder.start(m_url);
 
-    if (!m_transcoder.start(m_url, FPS, 1)) {
-        qDebug() << "Error transcoding!";
-        exit();
-    }
-}
-
-void Thread::onFinish()
-{
-    m_server->close();
-    qDebug() << "Thread stopped!";
+    exec();
 }

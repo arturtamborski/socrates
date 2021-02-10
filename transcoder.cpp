@@ -1,20 +1,20 @@
 #include <QDebug>
 #include "transcoder.h"
+#include "strings.h"
 
 Transcoder::Transcoder(QObject *parent)
     : QObject(parent)
 {
-    connect(&m_process,	&QProcess::started,    this, &Transcoder::onStart);
-    connect(&m_process,	SIGNAL(finished(int)), this, SLOT(onFinish(int)));
+    connect(&m_process,	&QProcess::errorOccurred, this, &Transcoder::onError);
+//    connect(&m_process,	&QProcess::finished,      this, &Transcoder::onFinish);
+    connect(&m_process, SIGNAL(finished(int, QProcess::ExitStatus)),
+            this,         SLOT(onFinish(int, QProcess::ExitStatus)));
 }
 
-Transcoder::~Transcoder()
+void Transcoder::start(QString &url)
 {
-    m_process.kill();
-}
+    qDebug() << STR_TRANSCODER_STARTING;
 
-bool Transcoder::start(QString &url, int fps, int speed)
-{
     m_args.clear();
 
     // source
@@ -27,10 +27,7 @@ bool Transcoder::start(QString &url, int fps, int speed)
     m_args << "-s" << "960x540";
 
     // frame limit
-    m_args << "-vf" << QString("fps=%1").arg(fps);
-
-    // slow down
-    m_args << "-filter:v" << QString("setpts=%1*PTS").arg(speed);
+    m_args << "-vf" << QString("fps=%1").arg(FPS);
 
     // overwrite output
     m_args << "-y";
@@ -51,46 +48,40 @@ bool Transcoder::start(QString &url, int fps, int speed)
     m_args << "-update" << "1";
 
     // limit frames
-    //m_args << "-vframes" << "10";
+    m_args << "-vframes" << "10";
 
     // output destination
-    m_args << "tcp://127.0.0.1:2563";
+    m_args << QString("tcp://127.0.0.1:%1").arg(PORT);
 
     m_process.start("ffmpeg", m_args);
-    if (!m_process.waitForStarted()) {
-        qDebug() << "Timeout! failed to start";
-        return false;
-    }
-
-    return true;
+    m_process.waitForStarted();
 }
 
 void Transcoder::finish()
 {
-    qDebug() << "stopping transcoder!";
     m_process.terminate();
+    m_process.waitForFinished();
 }
 
-bool Transcoder::isRunning()
+void Transcoder::printProcessOutput()
 {
-    return m_process.state() == m_process.Running;
-}
-
-void Transcoder::onStart()
-{
-    qDebug() << "StreamTranscoder: started!";
-    qDebug() << "Executed line:" << m_args.join(' ');
-
-}
-
-void Transcoder::onFinish(int code)
-{
-    qDebug() << "StreamTranscoder: finished!" << code;
-    qDebug() << "Exit code:" << m_process.exitStatus();
-    if (code > 0 && code < 255) {
-        auto lines = m_process.readAllStandardError().split('\n');
-        for (auto &line : lines) {
-            qDebug() << '\t' << line;
-        }
+    auto lines = m_process.readAllStandardError().split('\n');
+    for (auto &line : lines) {
+        qDebug() << '\t' << line;
     }
+}
+
+void Transcoder::onFinish(int exitCode, QProcess::ExitStatus exitStatus)
+{
+    auto value = QVariant::fromValue(exitStatus).toString();
+    qDebug() << STR_TRANSCODER << exitCode << " " << value;
+    printProcessOutput();
+}
+
+void Transcoder::onError(QProcess::ProcessError e)
+{
+    auto value = QVariant::fromValue(e).toString();
+    auto message = STR_TRANSCODER_FAILED " " + value;
+    printProcessOutput();
+    emit error(message);
 }

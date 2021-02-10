@@ -1,12 +1,18 @@
-#ifndef STREAMSERVER_H
-#define STREAMSERVER_H
-
-#include "worker.h"
+#ifndef SERVER_H
+#define SERVER_H
 
 #include <QTcpServer>
 #include <QTcpSocket>
-#include <QThreadPool>
 #include <QPixmap>
+
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/dnn.hpp>
+
+#include "worker.h"
+
+using namespace cv::dnn::dnn4_v20200310;
 
 class Server : public QTcpServer
 {
@@ -14,21 +20,25 @@ class Server : public QTcpServer
 
 public:
     explicit Server(QObject *parent = nullptr);
+    void start();
 
 signals:
-    void error(QTcpSocket::SocketError error);
-    void update(QPixmap *frame);
+    void error(QString message);
+    void frame(QPixmap *frame);
+
+public slots:
+    void onProcessedFrame(quint64 id);
 
 protected:
     void incomingConnection(qintptr descriptor) override;
 
 private:
+    quint64 m_counter;
     QTcpSocket m_socket;
 
-    quint64 m_id;
-    QPixmap m_frames[FPS];
-    Worker m_workers[FPS];
-    QThreadPool m_pool;
+    QVector<Net> m_nets;
+    QVector<QPixmap> m_frames;
+    QVector<Worker*> m_workers;
 };
 
-#endif // STREAMSERVER_H
+#endif // SERVER_H

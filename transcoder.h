@@ -1,5 +1,5 @@
-#ifndef STREAMTRANSCODER_H
-#define STREAMTRANSCODER_H
+#ifndef TRANSCODER_H
+#define TRANSCODER_H
 
 #include <QObject>
 #include <QProcess>
@@ -10,19 +10,23 @@ class Transcoder : public QObject
 
 public:
     Transcoder(QObject *parent = nullptr);
-    ~Transcoder();
 
-    bool start(QString &url, int fps, int speed = 1);
+    void start(QString &url);
     void finish();
-    bool isRunning();
+
+signals:
+    void error(QString message);
+
+private:
+    void printProcessOutput(void);
 
 public slots:
-    void onStart();
-    void onFinish(int code);
+    void onError(QProcess::ProcessError error);
+    void onFinish(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:
     QProcess m_process;
     QStringList m_args;
 };
 
-#endif // STREAMTRANSCODER_H
+#endif // TRANSCODER_H

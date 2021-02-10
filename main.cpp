@@ -1,16 +1,17 @@
-#include "mainwindow.h"
-
 #include <QApplication>
+
+#include "mainwindow.h"
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
-    a.setOrganizationName("arturtamborski");
-    a.setOrganizationDomain("pl");
-    a.setApplicationName("Socrates");
+    QApplication application(argc, argv);
+    QApplication::setOrganizationDomain(STR_ORG_DOMAIN);
+    QApplication::setOrganizationName(STR_ORG_NAME);
+    QApplication::setApplicationVersion(STR_APP_VERSION);
+    QApplication::setApplicationName(STR_APP_NAME);
 
-    MainWindow w;
-    w.show();
+    MainWindow window;
+    window.show();
 
-    return a.exec();
+    return application.exec();
 }

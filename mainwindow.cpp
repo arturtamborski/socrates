@@ -1,106 +1,71 @@
-#include <QStatusBar>
 #include <QMessageBox>
+#include <QDebug>
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
-#include "unistd.h"
-
-#define READY   " Ready."
-#define RUNNING " Running..."
-
-#define START   " Start"
-#define STOP    " Stop"
-
-#define LOCAL   "./stream.mp4"
-#define REMOTE  \
-    "https://videos3.earthcam.com/fecnetwork/" \
-    "AbbeyRoadHD1.flv/chunklist_w1632720834.m3u8"
+#include "strings.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , m_ui(new Ui::MainWindow)
-    , m_thread(new Thread(this))
-    , m_video(new QVideoWidget)
-    , m_player(new QMediaPlayer)
+    , m_thread(this)
 {
     m_ui->setupUi(this);
-    m_scene.addItem(&m_frame);
-    m_ui->graphicsView->setScene(&m_scene);
-    m_ui->graphicsView->show();
-    m_ui->statusBar->showMessage(READY);
+    m_ui->statusBar->showMessage(STR_READY);
+    m_ui->lineEditAddress->setText(STR_LOCAL);
 
-//    m_player.setMedia();
-    m_player.setVideoOutput(&m_video);
-    m_video.show();
-
-//    this.setCentralWidget(m_video);
-    m_player.play();
-
-    m_ui->lineEditAddress->setText(LOCAL);
-//    m_ui->lineEditAddress->setText(REMOTE);
-
-    connect(m_thread, &Thread::error, this, &MainWindow::onThreadError);
+    connect(&m_thread, &Thread::error, this, &MainWindow::onError, Qt::DirectConnection);
+    connect(&m_thread, &Thread::frame, this, &MainWindow::onFrame, Qt::DirectConnection);
 }
 
 MainWindow::~MainWindow()
 {
-    delete m_thread;
+    stop();
     delete m_ui;
 }
 
-void MainWindow::onThreadError(QTcpSocket::SocketError error)
+void MainWindow::onError(QString message)
 {
-    stopThread();
-
-    QMessageBox::critical(
-        this,
-        "Failed to start listening",
-        QVariant::fromValue(error).toString());
+    stop();
+    QMessageBox::critical(this, STR_ERROR, message);
 }
 
-void MainWindow::onServerError(QTcpSocket::SocketError error)
+void MainWindow::onFrame(QPixmap *frame)
 {
-    stopThread();
-
-    QMessageBox::critical(
-        this,
-        "Something went wrong with the socket",
-        QVariant::fromValue(error).toString());
-}
-
-void MainWindow::onUpdate(quint64 id, QPixmap *frame)
-{
-    qDebug() << id << "updating screen...";
-
-    //usleep(100 * 1000);
-    m_frame.setPixmap(*frame);
-    delete frame;
+    m_ui->labelDisplay->setPixmap(*frame);
 }
 
 void MainWindow::on_pushButtonStart_released()
 {
-    m_thread->isRunning()
-        ? stopThread()
-        : startThread();
+    m_thread.isRunning() ? stop() : start();
 }
 
-void MainWindow::startThread()
+void MainWindow::start()
 {
-    m_ui->statusBar->showMessage(RUNNING);
-    m_ui->pushButtonStart->setText(STOP);
+    if (m_thread.isRunning())
+        return;
+
+    m_ui->statusBar->showMessage(STR_RUNNING);
+    m_ui->pushButtonStart->setText(STR_STOP);
     m_ui->lineEditAddress->setFrame(false);
     m_ui->lineEditAddress->setReadOnly(true);
 
-    m_thread->setUrl(m_ui->lineEditAddress->text());
-    m_thread->start();
+    auto url = m_ui->lineEditAddress->text().trimmed();
+    m_thread.setUrl(url);
+    m_thread.start();
 }
 
-void MainWindow::stopThread()
+void MainWindow::stop()
 {
-    m_ui->statusBar->showMessage(READY);
-    m_ui->pushButtonStart->setText(START);
+    if (!m_thread.isRunning())
+        return;
+
+    m_ui->statusBar->showMessage(STR_READY);
+    m_ui->pushButtonStart->setText(STR_START);
     m_ui->lineEditAddress->setFrame(true);
     m_ui->lineEditAddress->setReadOnly(false);
 
-    m_thread->exit();
+    m_thread.quit();
+    m_thread.wait(100);
+    m_thread.requestInterruption();
 }

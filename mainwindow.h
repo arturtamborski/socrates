@@ -2,10 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QGraphicsScene>
-#include <QGraphicsPixmapItem>
-#include <QMediaPlayer>
-#include <QVideoWidget>
+#include <QPixmap>
+
 #include "thread.h"
 
 QT_BEGIN_NAMESPACE
@@ -21,22 +19,17 @@ public:
     ~MainWindow();
 
 public slots:
-    void onThreadError(QTcpSocket::SocketError error);
-    void onServerError(QTcpSocket::SocketError error);
-    void onUpdate(quint64 id, QPixmap *frame);
+    void onError(QString message);
+    void onFrame(QPixmap *frame);
     void on_pushButtonStart_released();
 
 private:
-    void startThread();
-    void stopThread();
+    void start();
+    void stop();
 
 private:
     Ui::MainWindow *m_ui;
-    Thread *m_thread;
-    QGraphicsScene m_scene;
-    QGraphicsPixmapItem m_frame;
-    QVideoWidget m_video;
-    QMediaPlayer m_player;
+    Thread m_thread;
 };
 
 #endif // MAINWINDOW_H

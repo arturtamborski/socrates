@@ -1,11 +1,7 @@
-#ifndef STREAMTHREAD_H
-#define STREAMTHREAD_H
+#ifndef THREAD_H
+#define THREAD_H
 
 #include <QThread>
-#include <QTcpSocket>
-#include <QContiguousCache>
-#include "server.h"
-#include "transcoder.h"
 
 class Thread : public QThread
 {
@@ -13,20 +9,15 @@ class Thread : public QThread
 
 public:
     explicit Thread(QObject *parent = nullptr);
-    ~Thread();
-    void setUrl(QString &&url);
+    void setUrl(QString &url);
+    void run() override;
 
 signals:
-    void error(QTcpSocket::SocketError error);
-
-private slots:
-    void onStart();
-    void onFinish();
+    void error(QString message);
+    void frame(QPixmap *frame);
 
 private:
-    Server *m_server;
-    Transcoder m_transcoder;
     QString m_url;
 };
 
-#endif // STREAMTHREAD_H
+#endif // THREAD_H

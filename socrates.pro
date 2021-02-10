@@ -2,8 +2,8 @@
 QT +=                       \
     core                    \
     gui                     \
-    widgets                 \
     network                 \
+    widgets                 \
     multimedia              \
     multimediawidgets       \
 
@@ -15,6 +15,7 @@ CONFIG +=                   \
 DEFINES +=                  \
     QT_DEPRECATED_WARNINGS  \
     FPS=24                  \
+    PORT=2564               \
 
 #############################
 SOURCES +=                  \
@@ -29,15 +30,29 @@ SOURCES +=                  \
 HEADERS +=                  \
     mainwindow.h            \
     server.h                \
+    strings.h               \
     thread.h                \
     transcoder.h            \
     worker.h                \
+
+
+INCLUDEPATH +=              \
+    /usr/local/include/opencv4/
+
+#INCLUDEPATH += 				\
+#    $$(OPENCV_SDK_DIR)/include/opencv4/
+
+#    -L$$(OPENCV_SDK_DIR)/x86/mingw/lib \
+LIBS +=                  	\
+    -lopencv_core           \
+    -lopencv_dnn            \
+    -lopencv_highgui        \
+    -lopencv_imgproc        \
 
 #############################
 FORMS +=                    \
     mainwindow.ui           \
 
 #############################
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
+INSTALLS +=                 \
+    target                  \
